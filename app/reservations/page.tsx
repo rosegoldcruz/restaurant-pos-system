@@ -85,7 +85,30 @@ export default function ReservationsPage() {
             <h2 className="text-lg font-semibold">Reservation Book</h2>
             <Input className="w-[180px]" type="date" value={filterDate} onChange={(event) => setFilterDate(event.target.value)} />
           </div>
-          <div className="overflow-x-auto">
+
+          <div className="space-y-2 md:hidden">
+            {visibleReservations.map((reservation) => (
+              <article key={reservation.id} className="rounded-md border border-primary/20 bg-dark/40 p-3">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <p className="font-medium">{reservation.guest}</p>
+                  <span className="rounded bg-primary/15 px-2 py-1 text-xs text-primary-light">{reservation.status}</span>
+                </div>
+                <p className="text-sm text-cream/70">
+                  {reservation.date} at {reservation.time} • Party {reservation.partySize}
+                </p>
+                <p className="mb-2 text-sm text-cream/70">{reservation.phone}</p>
+                <Button
+                  variant="outline"
+                  className="w-full border-primary/40 bg-dark-lighter/30 text-cream hover:bg-primary hover:text-white"
+                  onClick={() => cycleStatus(reservation.id)}
+                >
+                  Next Status
+                </Button>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[560px] text-sm">
               <thead className="text-left text-cream/70">
                 <tr>

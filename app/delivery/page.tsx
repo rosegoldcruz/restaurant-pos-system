@@ -46,7 +46,39 @@ export default function DeliveryPage() {
   return (
     <POSShell title="Delivery" subtitle="Dispatch board and driver assignment">
       <div className="rounded-lg border border-primary/30 bg-dark-lighter/40 p-4">
-        <div className="overflow-x-auto">
+        <div className="space-y-2 md:hidden">
+          {orders.map((order) => (
+            <article key={order.id} className="rounded-md border border-primary/20 bg-dark/40 p-3">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <p className="font-medium">{order.id}</p>
+                <span className="rounded bg-primary/15 px-2 py-1 text-xs text-primary-light">{order.status}</span>
+              </div>
+              <p className="text-sm">{order.guest}</p>
+              <p className="text-sm text-cream/70">{order.address}</p>
+              <p className="mb-2 text-sm text-primary-light">{formatCurrency(order.amountCents)}</p>
+              <select
+                value={order.driver}
+                onChange={(event) => updateDriver(order.id, event.target.value)}
+                className="mb-2 min-h-11 w-full rounded-md border border-primary/30 bg-dark-lighter px-2 py-1 text-sm"
+              >
+                {drivers.map((driver) => (
+                  <option key={driver} value={driver}>
+                    {driver}
+                  </option>
+                ))}
+              </select>
+              <Button
+                variant="outline"
+                onClick={() => advanceStatus(order.id)}
+                className="w-full border-primary/40 bg-dark-lighter/30 text-cream hover:bg-primary hover:text-white"
+              >
+                Advance
+              </Button>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[740px] text-sm">
             <thead className="text-left text-cream/70">
               <tr>

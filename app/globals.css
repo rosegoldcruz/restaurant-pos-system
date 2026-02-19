@@ -33,6 +33,7 @@
   body {
     @apply bg-dark text-cream;
     font-family: var(--font-poppins), system-ui, sans-serif;
+    overflow-x: hidden;
   }
 
   input,
@@ -63,4 +64,22 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
 }

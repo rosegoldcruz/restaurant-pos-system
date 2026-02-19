@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Plus, Minus } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Minus } from 'lucide-react'
 import { POSShell } from '@/components/pos/pos-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,7 @@ export default function MenuPage() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [cart, setCart] = useState<CartLine[]>([])
+  const [mobileCheckOpen, setMobileCheckOpen] = useState(false)
 
   const filteredItems = useMemo(() => {
     const text = search.trim().toLowerCase()
@@ -54,6 +55,7 @@ export default function MenuPage() {
   const subtotal = cartEntries.reduce((sum, entry) => sum + entry.lineTotal, 0)
   const tax = Math.round(subtotal * 0.0825)
   const total = subtotal + tax
+  const cartCount = cartEntries.reduce((sum, line) => sum + line.quantity, 0)
 
   function addToCart(itemId: string): void {
     setCart((current) => {
@@ -76,39 +78,127 @@ export default function MenuPage() {
   return (
     <POSShell
       title="Menu"
-      subtitle="Driftwoods AZ menu synced from source repository"
-      rightPanel={
-        <div className="rounded-lg border border-primary/30 bg-dark-lighter/60 p-4">
-          <h2 className="mb-3 text-lg font-semibold">Current Check</h2>
+      subtitle="Mobile-first menu operations synced from Driftwoods source"
+      topActions={
+        <div className="grid gap-2">
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search menu items, tags, or descriptions"
+            className="min-h-11"
+          />
+
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-start">
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              className="min-h-11 rounded-md border border-primary/30 bg-dark-lighter px-3 text-sm"
+            >
+              <option value="all">All Categories ({posMenuItems.length})</option>
+              {posMenuCategories.map((menuCategory) => (
+                <option key={menuCategory.id} value={menuCategory.id}>
+                  {menuCategory.name} ({menuCategory.itemCount})
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => setMobileCheckOpen((current) => !current)}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 text-sm sm:hidden"
+            >
+              Check ({cartCount}) {mobileCheckOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+          </div>
+
+          <div className="hidden flex-wrap gap-2 lg:flex">
+            <button
+              onClick={() => setCategory('all')}
+              className={`rounded-md border px-3 py-2 text-xs xl:text-sm ${
+                category === 'all' ? 'border-primary bg-primary text-white' : 'border-primary/30 bg-dark-lighter/30 hover:bg-primary/10'
+              }`}
+            >
+              All ({posMenuItems.length})
+            </button>
+            {posMenuCategories.map((menuCategory) => (
+              <button
+                key={menuCategory.id}
+                onClick={() => setCategory(menuCategory.id)}
+                className={`rounded-md border px-3 py-2 text-xs xl:text-sm ${
+                  category === menuCategory.id
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-primary/30 bg-dark-lighter/30 hover:bg-primary/10'
+                }`}
+              >
+                {menuCategory.name} ({menuCategory.itemCount})
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <div className="grid gap-3 xl:gap-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filteredItems.map((item) => (
+            <article key={item.id} className="menu-card rounded-lg border border-primary/20 bg-dark-lighter/40 p-3 xl:p-4">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <h3 className="text-[15px] font-semibold leading-tight text-cream xl:text-base">{item.name}</h3>
+                <span className="rounded bg-primary/20 px-2 py-1 text-[10px] text-primary-light">{item.categoryName}</span>
+              </div>
+              <p className="mb-2 text-sm leading-snug text-cream/75">{item.description || 'No description provided.'}</p>
+              {item.modifiers.length > 0 ? (
+                <p className="mb-2 text-xs text-accent">Modifiers: {item.modifiers.join(' | ')}</p>
+              ) : null}
+              <div className="flex items-end justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-primary-light">
+                    {getDisplayPrice(item.priceCents, item.maxPriceCents, item.priceLabel)}
+                  </p>
+                  {item.tags.length > 0 ? <p className="truncate text-xs text-cream/60">{item.tags.join(', ')}</p> : null}
+                </div>
+                <Button onClick={() => addToCart(item.id)} className="min-h-10 bg-primary px-3 text-white hover:bg-primary-dark">
+                  Add
+                </Button>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <section
+          className={`rounded-lg border border-primary/30 bg-dark-lighter/60 p-3 transition sm:p-4 ${
+            mobileCheckOpen || cartEntries.length === 0 ? 'block' : 'hidden sm:block'
+          }`}
+        >
+          <h2 className="mb-2 text-base font-semibold sm:text-lg">Current Check</h2>
           {cartEntries.length === 0 ? (
             <p className="text-sm text-cream/70">Add menu items to start an order.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {cartEntries.map((entry) => (
-                <div key={entry.itemId} className="rounded-md border border-primary/20 bg-dark/40 p-3">
+                <div key={entry.itemId} className="rounded-md border border-primary/20 bg-dark/40 p-2.5 sm:p-3">
                   <p className="text-sm font-medium">{entry.item.name}</p>
                   <p className="text-xs text-cream/70">{getDisplayPrice(entry.item.priceCents, entry.item.maxPriceCents, entry.item.priceLabel)}</p>
                   <div className="mt-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => adjustQuantity(entry.itemId, -1)}
-                        className="rounded border border-primary/30 p-1 hover:bg-primary/10"
+                        className="flex h-8 w-8 items-center justify-center rounded border border-primary/30 hover:bg-primary/10"
                       >
-                        <Minus className="h-3 w-3" />
+                        <Minus className="h-3.5 w-3.5" />
                       </button>
                       <span className="min-w-6 text-center text-sm">{entry.quantity}</span>
                       <button
                         onClick={() => adjustQuantity(entry.itemId, 1)}
-                        className="rounded border border-primary/30 p-1 hover:bg-primary/10"
+                        className="flex h-8 w-8 items-center justify-center rounded border border-primary/30 hover:bg-primary/10"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
                     <span className="text-sm font-semibold">{formatCurrency(entry.lineTotal)}</span>
                   </div>
                 </div>
               ))}
-              <div className="space-y-1 border-t border-primary/20 pt-3 text-sm">
+
+              <div className="space-y-1 border-t border-primary/20 pt-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-cream/70">Subtotal</span>
                   <span>{formatCurrency(subtotal)}</span>
@@ -122,71 +212,21 @@ export default function MenuPage() {
                   <span>{formatCurrency(total)}</span>
                 </div>
               </div>
-              <Button className="w-full bg-primary text-white hover:bg-primary-dark">Send to Kitchen</Button>
+
+              <Button className="min-h-11 w-full bg-primary text-white hover:bg-primary-dark">Process Transaction</Button>
             </div>
           )}
-        </div>
-      }
-      topActions={
-        <Input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search menu items"
-          className="min-w-[200px]"
-        />
-      }
-    >
-      <div className="space-y-4">
-        <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
-          <button
-            onClick={() => setCategory('all')}
-            className={`rounded-md border px-3 py-2 text-sm ${
-              category === 'all' ? 'border-primary bg-primary text-white' : 'border-primary/30 bg-dark-lighter/30 hover:bg-primary/10'
-            }`}
-          >
-            All ({posMenuItems.length})
-          </button>
-          {posMenuCategories.map((menuCategory) => (
-            <button
-              key={menuCategory.id}
-              onClick={() => setCategory(menuCategory.id)}
-              className={`rounded-md border px-3 py-2 text-sm whitespace-nowrap ${
-                category === menuCategory.id
-                  ? 'border-primary bg-primary text-white'
-                  : 'border-primary/30 bg-dark-lighter/30 hover:bg-primary/10'
-              }`}
-            >
-              {menuCategory.name} ({menuCategory.itemCount})
-            </button>
-          ))}
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-          {filteredItems.map((item) => (
-            <article key={item.id} className="menu-card rounded-lg border border-primary/20 bg-dark-lighter/40 p-4">
-              <div className="mb-2 flex items-start justify-between gap-3">
-                <h3 className="font-semibold leading-tight text-cream">{item.name}</h3>
-                <span className="rounded bg-primary/20 px-2 py-1 text-xs text-primary-light">{item.categoryName}</span>
-              </div>
-              <p className="mb-3 line-clamp-3 text-sm text-cream/75">{item.description || 'No description provided.'}</p>
-              {item.modifiers.length > 0 ? (
-                <p className="mb-3 text-xs text-accent">Modifiers: {item.modifiers.join(' | ')}</p>
-              ) : null}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-primary-light">
-                    {getDisplayPrice(item.priceCents, item.maxPriceCents, item.priceLabel)}
-                  </p>
-                  {item.tags.length > 0 ? <p className="text-xs text-cream/60">{item.tags.join(', ')}</p> : null}
-                </div>
-                <Button onClick={() => addToCart(item.id)} className="bg-primary text-white hover:bg-primary-dark">
-                  Add
-                </Button>
-              </div>
-            </article>
-          ))}
-        </div>
+        </section>
       </div>
+
+      {cartEntries.length > 0 ? (
+        <button
+          onClick={() => setMobileCheckOpen((current) => !current)}
+          className="fixed bottom-[74px] right-3 z-20 rounded-full border border-primary/40 bg-primary px-4 py-2 text-sm font-medium text-white shadow-lg sm:hidden"
+        >
+          {cartCount} items • {formatCurrency(total)}
+        </button>
+      ) : null}
     </POSShell>
   )
 }

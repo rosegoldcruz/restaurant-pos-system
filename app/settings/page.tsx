@@ -69,7 +69,27 @@ export default function SettingsPage() {
 
         <section className="rounded-lg border border-primary/30 bg-dark-lighter/40 p-4">
           <h2 className="mb-3 text-lg font-semibold">User Roles</h2>
-          <div className="overflow-x-auto">
+          <div className="space-y-2 md:hidden">
+            {roles.map((role) => (
+              <article key={role.name} className="rounded-md border border-primary/20 bg-dark/40 p-3">
+                <p className="mb-2 font-medium">{role.name}</p>
+                <label className="mb-2 flex items-center justify-between text-sm">
+                  Edit Menu
+                  <input type="checkbox" checked={role.canEditMenu} onChange={() => toggleRole(role.name, 'canEditMenu')} />
+                </label>
+                <label className="mb-2 flex items-center justify-between text-sm">
+                  Void Checks
+                  <input type="checkbox" checked={role.canVoidChecks} onChange={() => toggleRole(role.name, 'canVoidChecks')} />
+                </label>
+                <label className="flex items-center justify-between text-sm">
+                  View Accounting
+                  <input type="checkbox" checked={role.canViewAccounting} onChange={() => toggleRole(role.name, 'canViewAccounting')} />
+                </label>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[560px] text-sm">
               <thead className="text-left text-cream/70">
                 <tr>

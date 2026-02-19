@@ -52,7 +52,7 @@ export default function TableServicesPage() {
       <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
         <div className="rounded-lg border border-primary/30 bg-dark-lighter/40 p-4">
           <h2 className="mb-3 text-lg font-semibold">Dining Room Map</h2>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
             {tables.map((table) => (
               <button
                 key={table.id}

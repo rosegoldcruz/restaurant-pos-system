@@ -61,7 +61,17 @@ export default function AccountingPage() {
 
         <div className="rounded-lg border border-primary/30 bg-dark-lighter/40 p-4">
           <h2 className="mb-3 text-lg font-semibold">Revenue Log</h2>
-          <table className="w-full min-w-[460px] text-sm">
+          <div className="space-y-2 md:hidden">
+            {dayTransactions.map((transaction, index) => (
+              <article key={`${transaction.type}-${index}`} className="rounded-md border border-primary/20 bg-dark/40 p-3">
+                <p className="text-sm text-cream/70">{transaction.date}</p>
+                <p className="font-medium">{transaction.type}</p>
+                <p className="text-primary-light">{formatCurrency(transaction.amountCents)}</p>
+              </article>
+            ))}
+          </div>
+
+          <table className="hidden w-full min-w-[460px] text-sm md:table">
             <thead className="text-left text-cream/70">
               <tr>
                 <th className="py-2">Date</th>
